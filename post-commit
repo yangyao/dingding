@@ -1,0 +1,30 @@
+#!/usr/bin/php
+<?php
+error_reporting(0);
+$access_token = file_get_contents('./ACCESS_TOKEN');
+$ding = "https://oapi.dingtalk.com/robot/send?access_token=".$access_token;
+$output = [];
+$command = "git log  --pretty=oneline -2 --no-merges --abbrev-commit";
+exec($command,$output);
+
+$msg = [
+	"msgtype"=>"markdown",
+	"markdown"=>[
+		"title"=>"xx我们更新代码啦！",
+		"text"=>implode("\n\n > ",$output),
+	]
+];
+
+$request = [
+	'http'=>[
+		"header"=>"Content-Type: application/json\r\n",
+		"method"=>"POST",
+		"content"=>json_encode($msg,1),
+	]
+];
+
+$context = stream_context_create($request);
+
+$result = file_get_contents($ding,false,$context);
+exit(var_dump($result));
+
